@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -20,6 +19,7 @@ public class BookController {
 
     private final BookService bookService;
 
+    @Autowired
     public BookController(BookService bookService) {
         this.bookService = bookService;
     }
@@ -73,18 +73,16 @@ public class BookController {
 
     // Global exception handler for validation errors (400 Bad Request)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public java.util.Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        java.util.Map<String, String> errors = new java.util.HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> 
-                errors.put(error.getField(), error.getDefaultMessage()));
-        return errors;
+    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST); // 400 Bad Request
     }
 
     // Global exception handler for business logic errors (NoSuchElementException)
     @ExceptionHandler(NoSuchElementException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleNotFoundException(NoSuchElementException ex) {
-        return ex.getMessage(); // 404 Not Found
+    public ResponseEntity<String> handleNotFoundException(NoSuchElementException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND); // 404 Not Found
     }
 }

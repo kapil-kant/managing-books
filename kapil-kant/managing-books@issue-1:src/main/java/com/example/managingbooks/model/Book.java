@@ -1,10 +1,10 @@
 package com.example.managingbooks.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "books")
@@ -14,19 +14,21 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Title is required and cannot be empty")
+    @NotBlank(message = "Title is required")
+    @Size(max = 255, message = "Title cannot exceed 255 characters")
     private String title;
 
-    @NotBlank(message = "Author is required and cannot be empty")
+    @NotBlank(message = "Author is required")
+    @Size(max = 255, message = "Author cannot exceed 255 characters")
     private String author;
 
     @NotBlank(message = "ISBN is required")
-    // Basic ISBN pattern validation: Supports 10-digit ISBN-10 (with optional hyphens) or 13-digit ISBN-13
-    @Pattern(regexp = "^(\d{9}[\dX]|\d{13})$", message = "Invalid ISBN format (must be 10 or 13 digits)")
+    // Valid ISBN-10 or ISBN-13 regex pattern. Note: In Java string literals, backslashes need escaping.
+    @Pattern(regexp = "^(\d{9}[\dX]|\d{13})$", message = "Invalid ISBN format. Must be 10 or 13 digits.")
     private String isbn;
 
     @NotNull(message = "Published year is required")
-    @Min(value = 1000, message = "Published year must be a realistic year")
+    @Pattern(regexp = "^\d{4}$", message = "Published year must be a valid 4-digit year.")
     private Integer publishedYear;
 
     // Getters and Setters

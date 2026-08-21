@@ -2,12 +2,14 @@ package com.example.managingbooks.controller;
 
 import com.example.managingbooks.model.Book;
 import com.example.managingbooks.service.BookService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -18,7 +20,6 @@ public class BookController {
 
     private final BookService bookService;
 
-    @Autowired
     public BookController(BookService bookService) {
         this.bookService = bookService;
     }
@@ -74,17 +75,16 @@ public class BookController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public java.util.Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        return ex.getBindingResult().getFieldErrors().stream()
-                .collect(Collectors.toMap(
-                        error -> error.getField(),
-                        error -> error.getDefaultMessage()
-                ));
+        java.util.Map<String, String> errors = new java.util.HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> 
+                errors.put(error.getField(), error.getDefaultMessage()));
+        return errors;
     }
 
     // Global exception handler for business logic errors (NoSuchElementException)
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<String> handleNotFoundException(NoSuchElementException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage()); // 404 Not Found
+    public String handleNotFoundException(NoSuchElementException ex) {
+        return ex.getMessage(); // 404 Not Found
     }
 }

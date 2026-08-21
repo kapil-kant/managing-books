@@ -14,19 +14,19 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Title is required")
+    @NotBlank(message = "Title is required and cannot be empty")
     private String title;
 
-    @NotBlank(message = "Author is required")
+    @NotBlank(message = "Author is required and cannot be empty")
     private String author;
 
     @NotBlank(message = "ISBN is required")
-    // ISBN-13 (13 digits) or ISBN-10 (10 digits, simplified regex)
-    @Pattern(regexp = "^(\d{10}|\d{13})$", message = "Invalid ISBN format. Must be 10 or 13 digits.")
+    // Basic ISBN pattern validation: Supports 10-digit ISBN-10 (with optional hyphens) or 13-digit ISBN-13
+    @Pattern(regexp = "^(\d{9}[\dX]|\d{13})$", message = "Invalid ISBN format (must be 10 or 13 digits)")
     private String isbn;
 
     @NotNull(message = "Published year is required")
-    @Min(value = 1000, message = "Published year must be a valid year")
+    @Min(value = 1000, message = "Published year must be a realistic year")
     private Integer publishedYear;
 
     // Getters and Setters
